@@ -69,18 +69,66 @@ public class ProductRepositoryFile implements ProductRepository {
 
     @Override
     public Product findById(long id) {
-        return null;
+        return findAll()
+                .stream()
+                .filter(x -> x.getId() == id)
+                .findFirst()
+                .orElse(null);
+
     }
 
     @Override
     public void update(Product product) {
 
+        long idToUpdate = product.getId();
+        double newPrise = product.getPrice();
+
+        List<Product> products = findAll();
+
+        for (Product currentProduct: products){
+            if (currentProduct.getId() == idToUpdate){
+                currentProduct.setPrice(newPrise);
+                break;
+            }
+        }
+
+        try {
+            mapper.writeValue(database, products);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void deleteById(long id) {
 
+        List<Product> products = findAll();
+
+        products.stream()
+                .filter(x -> x.getId() == id)
+                .limit(1)
+                .forEach(x ->x.setActive(false) );
+
+        try {
+            mapper.writeValue(database, products);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 //    public static void main(String[] args) {
 //
